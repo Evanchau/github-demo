@@ -63,6 +63,8 @@ SELECT merchant_id
     , CHARINDEX('-', merchant_id)
     , PATINDEX('AWg%', merchant_id)
     , PATINDEX('%[ABC]%', merchant_id)
+    , PATINDEX('%[^ABC]%', merchant_id)
+    , STUFF(merchant_id, 1, 5, 'NEWSTRING')
 FROM Grab_RawData
 
 
