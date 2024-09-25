@@ -40,6 +40,36 @@ SELECT B.user_id, A.user_id, B.order_id, user_name, city_id, city_name, GMV
 FROM GRAB_JOINDATA AS A 
 RIGHT JOIN Grab_Rawdata AS B
     ON B.order_id = A.order_id 
+
+-- BT3: Từ bảng GRAB_RAWDATA và GRAB_JOINDATA, 
+-- kết hợp theo chiều dọc 2 cột order_id, user_id với nhau và LOẠI BỎ GIÁ TRỊ TRỦNG LẶP
+-- • Sắp xếp thứ tự theo cột order_id tăng dần
+SELECT order_id, user_id
+FROM Grab_Rawdata 
+UNION
+SELECT order_id, user_id
+FROM GRAB_JOINDATA
+ORDER BY 2
+
+-- Tách giá trị trước và sau dấu gạch ngang của cột merchant_id
+SELECT merchant_id
+    , LEFT(merchant_id, CHARINDEX('-', merchant_id) - 1) AS TRUOC_DAU
+    , RIGHT(merchant_id, LEN(merchant_id) - CHARINDEX('-', merchant_id)) AS SAU_DAU
+FROM Grab_RawData
+WHERE CHARINDEX('-', merchant_id) <> 0
+
+-- CHARINDEX VS PATINDEX
+SELECT merchant_id
+    , CHARINDEX('-', merchant_id)
+    , PATINDEX('AWg%', merchant_id)
+    , PATINDEX('%[ABC]%', merchant_id)
+FROM Grab_RawData
+
+
+
+
+
+
  
 
     
