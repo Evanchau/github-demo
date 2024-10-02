@@ -1,0 +1,81 @@
+-- BTVN:
+-- TỪ BẢNG ims_sales_order_item, lấy ra top 3 sản phẩm (name)
+-- có tổng giả trị (paid price) nhỏ nhất theoo từng loại shipping_type
+
+
+SELECT * FROM ims_sales_order_item
+
+-- SELECT *
+-- FROM 
+-- (
+--     SELECT name, SUM(paid_price) AS TOTAL_PRICE,
+--             ROW_NUMBER() OVER (PARTITION BY shipping_type ORDER BY SUM(paid_price) )
+--     FROM ims_sales_order_item
+--     GROUP BY name, shipping_type
+-- ) AS 
+-- WHERE ROW_NUMBER = 3
+
+
+SELECT *
+FROM 
+    (
+        SELECT Seller_ID, Seller_Vertical, Signup_Time,
+            RANK() OVER (PARTITION BY Seller_Vertical ORDER BY Signup_Time ASC) AS RANK_
+        FROM TIKI_TEST
+    ) AS A
+WHERE RANK_ = 1
+
+-- 2B
+-- Tìm PRODUCT ID có Average Stock lớn nhất theo từng tháng
+
+-- SELECT MONTH(DATE) AS MONTH_DATE
+--     , SUM(Stock) / COUNT(DISTINCT DATE) AS AVERAGE_STOCK
+-- FROM product_history
+-- GROUP BY MONTH(DATE)
+
+WITH DANHSACH AS (
+    SELECT MONTH(DATE) AS MONTH_DATE
+        , product_id
+        , SUM(Stock) / COUNT(DATE) AS AVERAGE_STOCK
+    FROM PRODUCT_HISTORY
+    GROUP BY MONTH(DATE), product_ID )
+, MAX_AVE AS (
+    SELECT MONTH_DATE, MAX(AVERAGE_STOCK) AS MAX_AVERAGE
+    FROM DANHSACH 
+    GROUP BY MONTH_DATE
+)
+
+SELECT A.MONTH_DATE, PRODUCT_ID, MAX_AVERAGE
+FROM MAX_AVE AS A 
+INNER JOIN DANHSACH AS B
+    ON MAX_AVERAGE = AVERAGE_STOCK AND A.MONTH_DATE = B.MONTH_DATE
+
+
+-- 2A 
+-- TÌM SỐ LƯỢNG SẢN PHẨM available for sales vào ngày cuối cùng của tháng
+-- số lượng sản phẩm : SUM(stock), COUNT(PRODUCT)
+-- available for sales: PRODUCT_STATUS = ON
+-- VÀO NGÀY CUỐI CÙNG CỦA THÁNG: MAX(DATE)
+
+-- 1. Tìm ra ngày cuối cùng của từng tháng
+-- 2. Danh sách số lượng sản phẩm theo từng ngày
+-- 3. JOIN (2) với (1) đê tìm ra sp theo đúng ngày cuối cùng
+
+
+WITH CUOICUNG AS (
+    SELECT MONTH(DATE) AS MONTH_DATE, MAX(DATE) AS EOM
+    -- RANK() OVER (PARTITION BY MONTH(DATE) ORDER BY DATE ASC) AS EOM: 
+    FROM PRODUCT_HISTORY
+    GROUP BY MONTH(DATE)
+)
+, DANHSACH AS (
+    SELECT DATE, SUM(STOCK) AS SL_SP
+    FROM PRODUCT_HISTORY 
+    WHERE PRODUCT_STATUS = 'On'
+    GROUP BY DATE
+)
+
+SELECT MONTH_DATE, SL_SP
+FROM CUOICUNG AS A 
+INNER JOIN DANHSACH AS B
+    ON A.EOM = B.DATE

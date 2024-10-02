@@ -245,14 +245,17 @@ SELECT *
 FROM CTE
 WHERE ROW_NUM = 1 -- ROW NUM: một hàm trong SQL được sử dụng để xếp hạng các bản ghi trong một tập kết quả
 
--- RANK
--- DENSE RANK
+-- RANK: dùng để xếp hạng các giá trị của một cột nào đó của 
+-- tập kết quả có được từ câu lệnh SELECT theo thứ tự tăng dần hoặc giảm dần các giá trị của cột này.
+-- ROW NUM: dùng để xếp hạng tập kết quả một cách tuần tự theo thứ tự bắt đầu từ 1 mà không quan tâm đến các giá trị giống nhau.
+-- DENSE RANK: 
 SELECT fk_sales_order
     , created_at
     , ROW_NUMBER() OVER (ORDER BY created_at ASC) AS ROW_NUM
-    , RANK() OVER (ORDER BY created_at ASC) AS RANK_ -- Giá trị sau sẽ được cộng theo số lần lặp
+    , RANK() OVER (ORDER BY created_at ASC) AS RANK_ 
     , DENSE_RANK() OVER (ORDER BY created_at ASC) AS DE_RA -- Thứ hạng vẫn giữ nguyên theo số thứ tự
 FROM ims_sales_order_item
+
 
 
 
